@@ -59,6 +59,81 @@
 			return json_decode($this->get($url),true);
 		}
 		
+		/** MISTERFIFI METHODS */
+	        public function get_user_specify($id) {
+	            $url = $this->build_url("/users/$id");
+	            return json_decode($this->get($url),true);
+	        }
+	        
+	        public function create_user($login, $name){
+	            $url = $this->build_url("/users");
+	            $params = array('login' =>$login, 'name' => $name) ;
+	            return json_decode($this->post($url, json_encode($params)), true);
+	        }
+	
+	        public function get_users(){
+	            $url = $this->build_url("/users");
+	            return json_decode($this->get($url));
+	        }
+	
+	        public function get_user_by_login($login){
+	            $url = $this->build_url("/users")."&filter_term=$login";
+	            return json_decode($this->get($url));
+	        }
+	
+	        public function get_userID_by_login($user){
+	            $result = $this->get_user_by_login($user->email);
+	            if(isset($result->entries)){
+	                if(count($result->entries)==1){
+	                    $user->id = $result->entries[0]->id;
+	                }
+	            }
+	            return $user;
+	        }
+	
+	        public function invite_user($login, $name){
+	            $url = $this->build_url("/invites");
+	            $params = array('login' =>$login, 'name' => $name) ;
+	            return json_decode($this->post($url, json_encode($params)), true);
+	        }
+	
+	        private function get_groups(){
+	            $url = $this->build_url("/groups");
+	            return json_decode($this->get($url));
+	        }
+	
+	        public function get_group_id($name){
+	            $group_id = 0;
+	            $groups = $this->get_groups();
+	            foreach($groups->entries as $group){
+	                if($group->name == $name){
+	                    $group_id = $group->id;
+	                }
+	            }
+	            return $group_id;
+	        }
+	
+	        public function create_group($name){
+	            $url = $this->build_url("/groups");
+	            $params = array('name' => $name) ;
+	            return json_decode($this->post($url, json_encode($params)), true);
+	        }
+	
+	        public function add_user_to_group($userId, $groupId){
+	            $url = $this->build_url("/group_memberships");
+	            $params = array('user' => array('id' => $userId), 'group' => array('id' => $groupId));
+	            return json_decode($this->post($url, json_encode($params)), true);
+	        }
+	
+	        public function share_folder_with_user($folderId, $userId){
+	            $url = $this->build_url("/collaborations");
+	            $items = array('id' => $folderId, "type" => "folder");
+	            $accessible_by = array("id" => $userId, "type" => "user");
+	            $params = array("item" => $items, "accessible_by" => $accessible_by ,"role" => "viewer");
+	            return json_decode($this->post($url, json_encode($params)), true);
+	        }
+	        /*** ===== END ===== */
+		
 		/* Get the details of the mentioned folder */
 		public function get_folder_details($folder, $json = false) {
 			$url = $this->build_url("/folders/$folder");
